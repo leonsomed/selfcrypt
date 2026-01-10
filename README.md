@@ -18,7 +18,7 @@ selfcrypt -i somefile.txt
 Decrypts an encrypted JSON block file. It will use the same filename as input file and remove the last `.json` extension. You can override the output file with `-o`.
 
 ```bash
-selfcrypt -i somefile_encrytped.txt.json
+selfcrypt -d -i somefile_encrytped.txt.json
 ```
 
 Encrypts from standard input instead of from file system. Helpful in case you want to encrypt a quick note from your clipboard. It requires an output file.
