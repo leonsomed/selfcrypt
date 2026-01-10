@@ -56,7 +56,13 @@ function parseParams() {
   }
 
   if (!params.has(optionMap.outputFile)) {
-    throw new Error("Required option -o");
+    const inputFile = params.get(optionMap.inputFile);
+    params.set(
+      optionMap.outputFile,
+      params.has(optionMap.decrypt)
+        ? inputFile.substring(0, inputFile.length - 5)
+        : inputFile + ".json",
+    );
   }
 
   return params;
@@ -96,13 +102,7 @@ async function run() {
   const params = parseParams();
   const isDecrypt = params.has(optionMap.decrypt);
   const inputFile = params.get(optionMap.inputFile);
-  const outputFile = isDecrypt
-    ? params.get(optionMap.outputFile)
-    : [
-        params.get(optionMap.outputFile),
-        inputFile.substring(inputFile.lastIndexOf(".") + 1),
-        "json",
-      ].join(".");
+  const outputFile = params.get(optionMap.outputFile);
 
   const inputDataBuffer = await validateFiles(inputFile, outputFile, isDecrypt);
 
