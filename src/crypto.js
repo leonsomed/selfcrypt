@@ -1,48 +1,8 @@
-const readline = require("node:readline");
-const Writable = require("node:stream").Writable;
 const crypto = require("node:crypto");
 
 const ALGORITHM = "aes-256-cbc";
 const IV_LENGTH = 16;
 const SALT_LENGTH = 16;
-
-const mutedStdout = new Writable({
-  write: (chunk, encoding, callback) => {
-    callback();
-  },
-});
-
-async function getPassphraseFromStdin(confirm, sufix) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: mutedStdout,
-    terminal: true,
-  });
-  console.log(`Enter a passphrase ${sufix}:`);
-  let passphrase;
-
-  for await (const line of rl) {
-    if (!passphrase) {
-      passphrase = line;
-      if (!confirm) {
-        rl.close();
-        break;
-      }
-      console.log("Confirm the passphrase:");
-    } else if (passphrase !== line) {
-      console.log("Passphrases missmatch, aborting");
-      rl.close();
-      throw new Error("PASSPHRASE_MISSMATCH");
-    } else {
-      rl.close();
-      break;
-    }
-  }
-
-  const KEY = Buffer.from(passphrase);
-
-  return KEY;
-}
 
 async function encrypt(data, passphrase) {
   const iv = crypto.randomBytes(IV_LENGTH);
@@ -94,7 +54,6 @@ function parseBlockFileData(buffer) {
 module.exports = {
   parseBlockFileData,
   validateBlockFileData,
-  getPassphraseFromStdin,
   encrypt,
   decrypt,
 };
