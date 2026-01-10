@@ -107,14 +107,14 @@ async function run() {
   const inputDataBuffer = await validateFiles(inputFile, outputFile, isDecrypt);
 
   if (isDecrypt) {
-    const passphrase = await getPassphraseFromStdin(false);
+    const passphrase = await getPassphraseFromStdin(false, " to decrypt");
     const block = parseBlockFileData(inputDataBuffer);
     const decrypted = await decrypt(block, passphrase);
 
     await fs.writeFile(outputFile, decrypted);
     console.log("Completed!");
   } else {
-    const passphrase = await getPassphraseFromStdin(true);
+    const passphrase = await getPassphraseFromStdin(true, " to encrypt");
     const block = await encrypt(inputDataBuffer, passphrase);
     const decrypted = await decrypt(block, passphrase);
 

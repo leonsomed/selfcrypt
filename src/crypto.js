@@ -12,13 +12,13 @@ const mutedStdout = new Writable({
   },
 });
 
-async function getPassphraseFromStdin(confirm) {
+async function getPassphraseFromStdin(confirm, sufix) {
   const rl = readline.createInterface({
     input: process.stdin,
     output: mutedStdout,
     terminal: true,
   });
-  console.log("Enter a passphrase:");
+  console.log(`Enter a passphrase ${sufix}:`);
   let passphrase;
 
   for await (const line of rl) {
