@@ -9,12 +9,15 @@ const {
   validateBlockFileData,
   parseBlockFileData,
 } = require("./crypto");
+const { encodeQRCode } = require("./qr");
 
 const optionMap = {
   inputFile: "-i",
   outputFile: "-o",
   decrypt: "-d",
   decryptStdout: "-do",
+  qrCode: "-qr",
+  help: "-h",
 };
 
 const mutedStdout = new Writable({
@@ -23,7 +26,7 @@ const mutedStdout = new Writable({
   },
 });
 
-function parseParams() {
+async function parseParams() {
   const args = process.argv.slice(2);
   const params = new Map();
 
@@ -62,6 +65,14 @@ function parseParams() {
         params.set(optionMap.outputFile, value);
         break;
       }
+      case optionMap.qrCode: {
+        params.set(optionMap.qrCode, true);
+        break;
+      }
+      case optionMap.help: {
+        params.set(optionMap.help, true);
+        break;
+      }
     }
   }
 
@@ -79,8 +90,13 @@ function parseParams() {
     );
   }
 
-  if (!params.has(optionMap.inputFile) && !params.has(optionMap.outputFile)) {
-    console.error("Either or both -i or -o required");
+  if (
+    params.has(optionMap.help) ||
+    (!params.has(optionMap.inputFile) && !params.has(optionMap.outputFile))
+  ) {
+    console.log(params);
+    const text = await fs.readFile(__dirname + "/../README.md", "utf-8");
+    console.log(text);
     process.exit(1);
   }
 
@@ -173,9 +189,10 @@ async function validateFiles(
 }
 
 async function run() {
-  const params = parseParams();
+  const params = await parseParams();
   const isDecrypt = params.has(optionMap.decrypt);
   const isDecryptStdout = params.has(optionMap.decryptStdout);
+  const isQRCode = params.has(optionMap.qrCode);
   const inputFile = params.get(optionMap.inputFile);
   const outputFile = params.get(optionMap.outputFile);
 
@@ -192,11 +209,20 @@ async function run() {
     const decrypted = await decrypt(block, passphrase);
 
     if (isDecryptStdout) {
-      console.log(decrypted.toString());
+      const result = decrypted.toString();
+      console.log(result);
+      if (isQRCode) {
+        console.log(encodeQRCode(result, true));
+      }
     } else {
       await fs.writeFile(outputFile, decrypted);
-      console.log("Completed!");
+      if (isQRCode) {
+        const output = encodeQRCode(result, false);
+        await fs.writeFile(outputFile + ".gif", output);
+      }
     }
+
+    console.log("Completed!");
   } else {
     const passphrase = await getPassphraseFromStdin(true, " to encrypt");
     const block = await encrypt(inputDataBuffer, passphrase);
@@ -207,7 +233,15 @@ async function run() {
       process.exit(1);
     }
 
-    await fs.writeFile(outputFile, JSON.stringify(block));
+    const json = JSON.stringify(block);
+    await fs.writeFile(outputFile, json);
+
+    if (isQRCode) {
+      console.log(encodeQRCode(json, true));
+      const output = encodeQRCode(json, false);
+      await fs.writeFile(outputFile + ".gif", output);
+    }
+
     console.log("Completed!");
   }
 }

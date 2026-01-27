@@ -1,6 +1,6 @@
 ## selfcrypt
 
-A simple utility to encrypt files via the terminal. It has only node native dependencies.
+A simple utility to encrypt files via the terminal. It has only node native dependencies and qr which itself has only node native dependencies.
 
 ## Usage
 
