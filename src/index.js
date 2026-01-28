@@ -211,15 +211,15 @@ async function run() {
 
     if (isDecryptStdout) {
       console.log(result);
-      if (isQRCode) {
-        console.log(encodeQRCode(result, true));
-      }
     } else {
       await fs.writeFile(outputFile, decrypted);
-      if (isQRCode) {
-        const output = encodeQRCode(result, false);
-        await fs.writeFile(outputFile + ".gif", output);
-      }
+    }
+
+    if (isQRCode) {
+      const output = encodeQRCode(result, false);
+      const filename = (outputFile ?? inputFile) + ".decrypted.gif";
+      await fs.writeFile(filename, output);
+      console.log("QR Code decrypted file generated at " + filename);
     }
 
     console.log("Completed!");
@@ -237,9 +237,10 @@ async function run() {
     await fs.writeFile(outputFile, json);
 
     if (isQRCode) {
-      console.log(encodeQRCode(json, true));
       const output = encodeQRCode(json, false);
-      await fs.writeFile(outputFile + ".gif", output);
+      const filename = outputFile + ".encrypted.gif";
+      await fs.writeFile(filename, output);
+      console.log("QR Code encrypted file generated at " + filename);
     }
 
     console.log("Completed!");

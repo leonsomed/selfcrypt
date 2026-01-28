@@ -9,6 +9,8 @@ npm link # install globally
 zsh # you might need to restart you terminal
 ```
 
+You can pass the `-qr` option to all of the variations and it will create a file with a QR code of the content.
+
 Encrypts a file to an encrypted JSON block file. It will append `.json` extension to the output filename or you can pass the `-o` option to override the output filename.
 
 ```bash
