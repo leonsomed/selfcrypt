@@ -8,6 +8,7 @@ const {
   decrypt,
   validateBlockFileData,
   parseBlockFileData,
+  LATEST_VERSION,
 } = require("./crypto");
 const { encodeQRCode } = require("./qr");
 
@@ -17,6 +18,7 @@ const optionMap = {
   decrypt: "-d",
   decryptStdout: "-do",
   qrCode: "-qr",
+  reencryptToLatest: "-r",
   help: "-h",
 };
 
@@ -40,6 +42,9 @@ async function parseParams() {
       case optionMap.decryptStdout:
         params.set(optionMap.decrypt, true);
         params.set(optionMap.decryptStdout, true);
+        break;
+      case optionMap.reencryptToLatest:
+        params.set(optionMap.reencryptToLatest, true);
         break;
       case optionMap.inputFile: {
         i += 1;
@@ -86,7 +91,11 @@ async function parseParams() {
       optionMap.outputFile,
       params.has(optionMap.decrypt)
         ? inputFile.substring(0, inputFile.length - 5)
-        : inputFile + ".json",
+        : inputFile +
+            (params.has(optionMap.reencryptToLatest)
+              ? `.v${LATEST_VERSION}`
+              : "") +
+            ".json",
     );
   }
 
@@ -140,6 +149,7 @@ async function validateFiles(
   outputFile,
   isDecrypt,
   isDecryptStdout,
+  isReencryptToLatest,
 ) {
   if (!isDecryptStdout) {
     const outputFileStats = await fs.stat(outputFile).catch((e) => {
@@ -164,7 +174,10 @@ async function validateFiles(
       throw e;
     });
 
-    if (isDecrypt && !validateBlockFileData(inputDataBuffer)) {
+    if (
+      (isDecrypt || isReencryptToLatest) &&
+      !validateBlockFileData(inputDataBuffer)
+    ) {
       console.error("Input file is not an encrypted block");
       process.exit(1);
     }
@@ -192,6 +205,7 @@ async function run() {
   const params = await parseParams();
   const isDecrypt = params.has(optionMap.decrypt);
   const isDecryptStdout = params.has(optionMap.decryptStdout);
+  const isReencryptToLatest = params.has(optionMap.reencryptToLatest);
   const isQRCode = params.has(optionMap.qrCode);
   const inputFile = params.get(optionMap.inputFile);
   const outputFile = params.get(optionMap.outputFile);
@@ -201,11 +215,13 @@ async function run() {
     outputFile,
     isDecrypt,
     isDecryptStdout,
+    isReencryptToLatest,
   );
 
   if (isDecrypt) {
+    const dataBuffer = inputDataBuffer;
     const passphrase = await getPassphraseFromStdin(false, " to decrypt");
-    const block = parseBlockFileData(inputDataBuffer);
+    const block = parseBlockFileData(dataBuffer);
     const decrypted = await decrypt(block, passphrase);
     const result = decrypted.toString();
 
@@ -224,11 +240,23 @@ async function run() {
 
     console.log("Completed!");
   } else {
+    let dataBuffer = inputDataBuffer;
+
+    if (isReencryptToLatest) {
+      console.log("You are reencrypting an existingn block");
+      const prevPassphrase = await getPassphraseFromStdin(
+        false,
+        " to decrypt old block",
+      );
+      const originalBlock = parseBlockFileData(inputDataBuffer);
+      dataBuffer = await decrypt(originalBlock, prevPassphrase);
+    }
+
     const passphrase = await getPassphraseFromStdin(true, " to encrypt");
-    const block = await encrypt(inputDataBuffer, passphrase);
+    const block = await encrypt(dataBuffer, passphrase, LATEST_VERSION);
     const decrypted = await decrypt(block, passphrase);
 
-    if (Buffer.compare(inputDataBuffer, decrypted) !== 0) {
+    if (Buffer.compare(dataBuffer, decrypted) !== 0) {
       console.error("There was a problem, please try again");
       process.exit(1);
     }

@@ -19,6 +19,12 @@ Encrypts a file to an encrypted JSON block file. It will append `.json` extensio
 selfcrypt -i somefile.txt
 ```
 
+Encrypts a previously encrypted file again. Use this when you want to change the encryption password or update to the latest encryption version.
+
+```bash
+selfcrypt -i some_encrypted_file.json -r
+```
+
 Decrypts an encrypted JSON block file. It will use the same filename as input file and remove the last `.json` extension. You can override the output file with `-o`.
 
 ```bash

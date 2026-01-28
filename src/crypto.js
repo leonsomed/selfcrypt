@@ -41,7 +41,7 @@ async function getKey({ passphrase, salt, version }) {
   }
 }
 
-async function encrypt(data, passphrase, version = LATEST_VERSION) {
+async function encrypt(data, passphrase, version) {
   const iv = crypto.randomBytes(IV_LENGTH);
   const salt = crypto.randomBytes(SALT_LENGTH);
   const key = await getKey({ passphrase, salt, version });
@@ -100,4 +100,5 @@ module.exports = {
   validateBlockFileData,
   encrypt,
   decrypt,
+  LATEST_VERSION,
 };
