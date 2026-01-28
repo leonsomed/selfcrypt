@@ -2,7 +2,7 @@
 
 A simple utility to encrypt files via the terminal. It has only node native dependencies and qr which itself has only node native dependencies.
 
-Make sure to use node v24 or later.
+It encrypts files using AES-256-CBC. It passes the provided password through Argon2 KDF with a random salt. The result is a JSON encoded file with the encrypted ciphertext and settings to use for decryption. Additionally, you can specify an option to generate a QR code out of the encrypted file. The QR code is very useful for backup purposes since it can be printed to laminated paper. Also useful to transmit encrypted files to and from airgap devices via QR code scanning.
 
 ## Usage
 
