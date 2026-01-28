@@ -2,6 +2,8 @@
 
 A simple utility to encrypt files via the terminal. It has only node native dependencies and qr which itself has only node native dependencies.
 
+Make sure to use node v24 or later.
+
 ## Usage
 
 ```bash
