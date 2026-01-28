@@ -4,11 +4,11 @@ function encodeQRCode(data, isTerminal) {
   let qrcodeBuffer;
 
   if (isTerminal) {
-    qrcodeBuffer = encodeQR(JSON.stringify(data), "term", {
+    qrcodeBuffer = encodeQR(data, "term", {
       ecc: "low",
     });
   } else {
-    qrcodeBuffer = encodeQR(JSON.stringify(data), "gif", {
+    qrcodeBuffer = encodeQR(data, "gif", {
       ecc: "low",
       scale: 4,
     });

@@ -207,9 +207,9 @@ async function run() {
     const passphrase = await getPassphraseFromStdin(false, " to decrypt");
     const block = parseBlockFileData(inputDataBuffer);
     const decrypted = await decrypt(block, passphrase);
+    const result = decrypted.toString();
 
     if (isDecryptStdout) {
-      const result = decrypted.toString();
       console.log(result);
       if (isQRCode) {
         console.log(encodeQRCode(result, true));
