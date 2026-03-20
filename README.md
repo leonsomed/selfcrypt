@@ -1,6 +1,6 @@
 ## selfcrypt
 
-A simple utility to encrypt files via the terminal. It has only node native dependencies and qr which itself has only node native dependencies.
+A simple utility to encrypt files via the terminal. It has only the essential dependencies of qr, jimp, and native dependencies.
 
 It encrypts files using AES-256-CBC. It passes the provided password through Argon2 KDF with a random salt. The result is a JSON encoded file with the encrypted ciphertext and settings to use for decryption. Additionally, you can specify an option to generate a QR code out of the encrypted file. The QR code is very useful for backup purposes since it can be printed to laminated paper. Also useful to transmit encrypted files to and from airgap devices via QR code scanning.
 
@@ -12,6 +12,8 @@ zsh # you might need to restart you terminal
 ```
 
 You can pass the `-qr` option to all of the variations and it will create a file with a QR code of the content.
+
+You can pass an image file (.jpg) as input `-i test.jpg` when using the decode option `-d` to scan for a QR code in the image file.
 
 Encrypts a file to an encrypted JSON block file. It will append `.json` extension to the output filename or you can pass the `-o` option to override the output filename.
 

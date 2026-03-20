@@ -10,7 +10,8 @@ const {
   parseBlockFileData,
   LATEST_VERSION,
 } = require("./crypto");
-const { encodeQRCode } = require("./qr");
+const { encodeQRCode, decodeBitmapQRCode } = require("./qr");
+const { maybeGetImageBitmap } = require("./picture");
 
 const optionMap = {
   inputFile: "-i",
@@ -166,7 +167,7 @@ async function validateFiles(
   }
 
   if (inputFile) {
-    const inputDataBuffer = await fs.readFile(inputFile).catch((e) => {
+    let inputDataBuffer = await fs.readFile(inputFile).catch((e) => {
       if (e?.code === "ENOENT") {
         console.error("Input file doesn't exist, provide a valid path");
         process.exit(1);
@@ -174,12 +175,21 @@ async function validateFiles(
       throw e;
     });
 
-    if (
-      (isDecrypt || isReencryptToLatest) &&
-      !validateBlockFileData(inputDataBuffer)
-    ) {
-      console.error("Input file is not an encrypted block");
-      process.exit(1);
+    if (isDecrypt || isReencryptToLatest) {
+      const bitmap = await maybeGetImageBitmap(inputDataBuffer.buffer);
+      let rawStr;
+
+      if (bitmap) {
+        rawStr = decodeBitmapQRCode(bitmap);
+        inputDataBuffer = Buffer.from(rawStr);
+      } else {
+        rawStr = inputDataBuffer.toString();
+      }
+
+      if (!validateBlockFileData(rawStr)) {
+        console.error("Input file is not an encrypted block");
+        process.exit(1);
+      }
     }
 
     return inputDataBuffer;
@@ -221,7 +231,7 @@ async function run() {
   if (isDecrypt) {
     const dataBuffer = inputDataBuffer;
     const passphrase = await getPassphraseFromStdin(false, " to decrypt");
-    const block = parseBlockFileData(dataBuffer);
+    const block = parseBlockFileData(dataBuffer.toString());
     const decrypted = await decrypt(block, passphrase);
     const result = decrypted.toString();
 
@@ -248,7 +258,7 @@ async function run() {
         false,
         " to decrypt old block",
       );
-      const originalBlock = parseBlockFileData(inputDataBuffer);
+      const originalBlock = parseBlockFileData(inputDataBuffer.toString());
       dataBuffer = await decrypt(originalBlock, prevPassphrase);
     }
 

@@ -1,4 +1,10 @@
 const { encodeQR } = require("qr");
+const { decodeQR } = require("qr/decode.js");
+
+function decodeBitmapQRCode(bitmap) {
+  const decodedString = decodeQR(bitmap);
+  return decodedString;
+}
 
 function encodeQRCode(data, isTerminal) {
   let qrcodeBuffer;
@@ -18,4 +24,5 @@ function encodeQRCode(data, isTerminal) {
 
 module.exports = {
   encodeQRCode,
+  decodeBitmapQRCode,
 };

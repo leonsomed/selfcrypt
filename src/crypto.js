@@ -77,9 +77,9 @@ async function decrypt(block, passphrase) {
   return decrypted;
 }
 
-function validateBlockFileData(buffer) {
+function validateBlockFileData(rawStr) {
   try {
-    const block = parseBlockFileData(buffer);
+    const block = parseBlockFileData(rawStr);
 
     if (!block.iv || !block.salt || !block.data) {
       return false;
@@ -91,8 +91,8 @@ function validateBlockFileData(buffer) {
   }
 }
 
-function parseBlockFileData(buffer) {
-  return JSON.parse(buffer.toString());
+function parseBlockFileData(rawStr) {
+  return JSON.parse(rawStr);
 }
 
 module.exports = {
