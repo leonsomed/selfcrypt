@@ -21,6 +21,7 @@ const optionMap = {
   qrCode: "-qr",
   reencryptToLatest: "-r",
   help: "-h",
+  useNativeArgon2: "-na",
 };
 
 const mutedStdout = new Writable({
@@ -77,6 +78,10 @@ async function parseParams() {
       }
       case optionMap.help: {
         params.set(optionMap.help, true);
+        break;
+      }
+      case optionMap.useNativeArgon2: {
+        params.set(optionMap.useNativeArgon2, true);
         break;
       }
     }
@@ -219,6 +224,7 @@ async function run() {
   const isQRCode = params.has(optionMap.qrCode);
   const inputFile = params.get(optionMap.inputFile);
   const outputFile = params.get(optionMap.outputFile);
+  const useNativeArgon2 = params.get(optionMap.useNativeArgon2);
 
   const inputDataBuffer = await validateFiles(
     inputFile,
@@ -232,7 +238,7 @@ async function run() {
     const dataBuffer = inputDataBuffer;
     const passphrase = await getPassphraseFromStdin(false, " to decrypt");
     const block = parseBlockFileData(dataBuffer.toString());
-    const decrypted = await decrypt(block, passphrase);
+    const decrypted = await decrypt(block, passphrase, useNativeArgon2);
     const result = decrypted.toString();
 
     if (isDecryptStdout) {
@@ -259,12 +265,21 @@ async function run() {
         " to decrypt old block",
       );
       const originalBlock = parseBlockFileData(inputDataBuffer.toString());
-      dataBuffer = await decrypt(originalBlock, prevPassphrase);
+      dataBuffer = await decrypt(
+        originalBlock,
+        prevPassphrase,
+        useNativeArgon2,
+      );
     }
 
     const passphrase = await getPassphraseFromStdin(true, " to encrypt");
-    const block = await encrypt(dataBuffer, passphrase, LATEST_VERSION);
-    const decrypted = await decrypt(block, passphrase);
+    const block = await encrypt(
+      dataBuffer,
+      passphrase,
+      LATEST_VERSION,
+      useNativeArgon2,
+    );
+    const decrypted = await decrypt(block, passphrase, useNativeArgon2);
 
     if (Buffer.compare(dataBuffer, decrypted) !== 0) {
       console.error("There was a problem, please try again");

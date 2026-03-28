@@ -13,10 +13,11 @@
   "license": "ISC",
   "description": "",
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=22.22.2"
   },
   "dependencies": {
-    "qr": "0.5.3",
-    "jimp": "1.6.0"
+    "argon2": "^0.44.0",
+    "jimp": "1.6.0",
+    "qr": "0.5.3"
   }
 }
